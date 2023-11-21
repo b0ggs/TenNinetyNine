@@ -28,7 +28,7 @@ contract TenNineNine is ERC721A {
     address public owner;
     string public genslerURI = "https://ipfs.io/ipfs/CID/{id}.png";
     string public yellenURI = "https://ipfs.io/ipfs/CID/{id}.png";
-    string public werferURI = "https://ipfs.io/ipfs/CID/{id}.png";
+    string public werfelURI = "https://ipfs.io/ipfs/CID/{id}.png";
     string public lockedURI;
     bool public lockURI = false;
     
@@ -41,7 +41,7 @@ contract TenNineNine is ERC721A {
     uint8[3] public civilServants = [
         1, // gensler
         2, // yellen
-        3 // werfer
+        3 // werfel
     ];
 
     // Events
@@ -54,7 +54,7 @@ contract TenNineNine is ERC721A {
         _;
     }
 
-    constructor(string memory name, string memory symbol) {
+    constructor(string memory name, string memory symbol)ERC721A() {
         owner = msg.sender;
     }
 
@@ -101,13 +101,13 @@ contract TenNineNine is ERC721A {
         }
     }
 
-    function changeTenNinetyNine(uint256[] calldata tokenIds, uint8 newId) external stateThree {
+    function changeTenNinetyNine(uint256[] calldata tokenIds, uint8 newId) external {
         if(newId != 0 && newId != 1 && newId != 2) revert notValidId();
 
         uint256 newIncrement;
         uint256 genslerDecrement;
         uint256 yellenDecrement;
-        uint256 werferDecrement;
+        uint256 werfelDecrement;
 
         for (uint256 i; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
@@ -120,13 +120,13 @@ contract TenNineNine is ERC721A {
                     } else if (currentTeam == 1) {
                         yellenDecrement++;
                     } else if (currentTeam == 2) {
-                        werferDecrement++;
+                        werfelDecrement++;
                     }
 
                     tokenCivilServants[tokenIds[i]] = newId; // Update team of the token
             }
            
-            _bulkUpdatecivilServantCountsState(newTeam, newIncrement, genslerDecrement, yellenDecrement, werferDecrement);
+            _bulkUpdatecivilServantCountsState(newTeam, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
             _checkGameOver();
 
         }
@@ -148,7 +148,7 @@ contract TenNineNine is ERC721A {
             } else if(tokenCivilId == 1){
                 return yellenURI;
             }else if(tokenCivilId == 2){
-                return werferURI;
+                return werfelURI;
             }
 
         } else {
@@ -158,15 +158,15 @@ contract TenNineNine is ERC721A {
 
     //INTERNAL FUNCTIONS
 
-    function _bulkUpdatecivilServantCountsState(bytes32 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werferDecrement) internal {
+    function _bulkUpdatecivilServantCountsState(bytes32 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werfelDecrement) internal {
         if (newTeam == 0) {
             civilServantCounts[0] += newIncrement;
             civilServantCounts[1] -= yellenDecrement;
-            civilServantCounts[2] -= werferDecrement;
+            civilServantCounts[2] -= werfelDecrement;
         } else if (newTeam == 1) {
             civilServantCounts[1] += newIncrement;
             civilServantCounts[0] -= genslerDecrement;
-            civilServantCounts[2] -= werferDecrement;
+            civilServantCounts[2] -= werfelDecrement;
         } else if (newTeam == 2) {
             civilServantCounts[2] += newIncrement;
             civilServantCounts[0] -= genslerDecrement;
@@ -182,7 +182,7 @@ contract TenNineNine is ERC721A {
         } else if (civilServantCounts[1] >= winTokenAmount) {
             lockedURI = yellenURI;
         } else if (civilServantCounts[2] >= winTokenAmount) {
-            lockedURI = werferURI;
+            lockedURI = werfelURI;
         }
 
         if (lockedURI != "") { // If lockedURI has been set
@@ -193,4 +193,3 @@ contract TenNineNine is ERC721A {
 
 
 }
-
