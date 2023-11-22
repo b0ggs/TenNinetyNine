@@ -6,7 +6,7 @@ contract testMint is Test{
 
     TenNineNine public tennn;
     function setUp() public {
-        tennn = new TenNineNine();
+        tennn = new TenNineNine("test","TEST");
 
     }
 

@@ -112,7 +112,7 @@ contract TenNineNine is ERC721A {
 
         for (uint256 i; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
-            if(!ownerOf(tokenId)) revert notOwner();
+            if(ownerOf(tokenId) != msg.sender) revert notOwner();
             uint8 currentId = tokenToCivilServantMapping[tokenId];
             if (currentId != newId){
                 newIncrement++; // Increment only if there was a change
@@ -159,7 +159,7 @@ contract TenNineNine is ERC721A {
 
     //INTERNAL FUNCTIONS
 
-    function _bulkUpdatecivilServantCountsState(bytes32 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werfelDecrement) internal {
+    function _bulkUpdatecivilServantCountsState(uint8 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werfelDecrement) internal {
         if (newTeam == 0) {
             civilServantCounts[0] += newIncrement;
             civilServantCounts[1] -= yellenDecrement;
@@ -186,9 +186,9 @@ contract TenNineNine is ERC721A {
             lockedURI = werfelURI;
         }
 
-        if (lockedURI != "") { // If lockedURI has been set
+        if (keccak256(abi.encodePacked(lockedURI)) != keccak256(abi.encodePacked(""))) { // If lockedURI has been set
             lockURI = true;
-            emit lockURI(lockedURI);
+          //  emit lockURI(lockedURI);
         }
     }
 
