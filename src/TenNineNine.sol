@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "lib/ERC721A/contracts/ERC721A.sol";
-import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+import {ERC721A} from "lib/ERC721A/contracts/ERC721A.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+
 
 
 // NOTES
@@ -11,7 +14,7 @@ import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 // Can we mint for OP?
 // can we add ways to withdraw other tokens?
 
-contract TenNineNine is ERC721A {
+contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
 
     // Errors
     error notOwner();
@@ -26,10 +29,10 @@ contract TenNineNine is ERC721A {
 
 
     // State variables 
-    address public owner;
-    string public genslerURI = "https://ipfs.io/ipfs/CID/{id}.png";
-    string public yellenURI = "https://ipfs.io/ipfs/CID/{id}.png";
-    string public werfelURI = "https://ipfs.io/ipfs/CID/{id}.png";
+   // address public owner;
+    string public genslerURI = "gensler";
+    string public yellenURI = "yellen";
+    string public werfelURI = "werfel";
     string public lockedURI;
     bool public lockURI = false;
     
@@ -47,16 +50,9 @@ contract TenNineNine is ERC721A {
 
     // Events
     event BalanceWithdrawn(address owner, uint256 amount);
- 
 
-    // Modifiers
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the contract owner");
-        _;
-    }
 
-    constructor(string memory name, string memory symbol)ERC721A(name, symbol) {
-        owner = msg.sender;
+    constructor(string memory name, string memory symbol)ERC721A(name, symbol)Ownable(msg.sender) {
     }
 
     receive() external payable {}
@@ -67,10 +63,15 @@ contract TenNineNine is ERC721A {
 
     /// @notice Withdraws the entire Ether balance to the owner's address.
     /// @dev Can only be called by the contract owner.
-    function withdrawBalance() external onlyOwner {
-        uint256 amount = address(this).balance;
-        require(amount > 0, "No Ether funds to withdraw");
-        payable(owner).transfer(amount);
+    // function withdrawBalance() external onlyOwner {
+    //     uint256 amount = address(this).balance;
+    //     require(amount > 0, "No Ether funds to withdraw");
+    //     payable(owner).transfer(amount);
+    // }
+
+    function withdrawBalance() external onlyOwner nonReentrant {
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "Transfer failed.");
     }
 
     /// @notice Withdraws the entire balance of a specified ERC-20 token to the owner's address.
@@ -79,7 +80,7 @@ contract TenNineNine is ERC721A {
         IERC20 token = IERC20(tokenAddress);
         uint256 tokenBalance = token.balanceOf(address(this));
         require(tokenBalance > 0, "No token funds to withdraw");
-        token.transfer(owner, tokenBalance);
+        token.transfer(msg.sender, tokenBalance);
     }
 
     /// @notice Mints a specified quantity of tokens and allocates funds to the designer balance and game pot.
@@ -87,8 +88,6 @@ contract TenNineNine is ERC721A {
     /// @param quantity The number of tokens to mint.
     function mintToken(uint16 quantity) external payable {
         require(totalSupply() + quantity <= MAX_TOKENS, "Mint exceeds max amount");
-        require(msg.value == MINT_COST * quantity, "Incorrect Ether sent");
-
         uint256 currentSupply = totalSupply();
         for (uint16 i = 0; i < quantity; i++) {
             uint256 newTokenId = currentSupply + i;
@@ -100,6 +99,7 @@ contract TenNineNine is ERC721A {
             tokenToCivilServantMapping[newTokenId] = civilServant; // Assign the team to the token
             civilServantCounts[civilServant]++; // Increment the team count
         }
+        refundIfOver(MINT_COST * quantity);
     }
 
     function changeTenNinetyNine(uint256[] calldata tokenIds, uint8 newId) external {
@@ -158,6 +158,14 @@ contract TenNineNine is ERC721A {
             return lockedURI;
         }
     }
+
+    //PRIVATE FUNCTIONS
+  function refundIfOver(uint256 price) private {
+    require(msg.value >= price, "Need to send more ETH.");
+    if (msg.value > price) {
+      payable(msg.sender).transfer(msg.value - price);
+    }
+  }
 
     //INTERNAL FUNCTIONS
 
