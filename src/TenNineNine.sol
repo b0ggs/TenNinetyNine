@@ -150,6 +150,8 @@ contract TenNineNine is ERC721A {
                 return yellenURI;
             }else if(tokenCivilId == 2){
                 return werfelURI;
+            } else{
+                revert nonExistentToken();
             }
 
         } else {
