@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "lib/ERC721A/contracts/ERC721A.sol";
+import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 
 
 // NOTES
@@ -35,7 +36,7 @@ contract TenNineNine is ERC721A {
 
     // Data Structures
 
-    mapping(uint256 => uint8) public tokenCivilServants;
+    mapping(uint256 => uint8) public tokenToCivilServantMapping;
     mapping(uint8 => uint256) public civilServantCounts;
 
     uint8[3] public civilServants = [
@@ -54,7 +55,7 @@ contract TenNineNine is ERC721A {
         _;
     }
 
-    constructor(string memory name, string memory symbol)ERC721A() {
+    constructor(string memory name, string memory symbol)ERC721A(name, symbol) {
         owner = msg.sender;
     }
 
@@ -69,7 +70,7 @@ contract TenNineNine is ERC721A {
     function withdrawBalance() external onlyOwner {
         uint256 amount = address(this).balance;
         require(amount > 0, "No Ether funds to withdraw");
-        payable(owner()).transfer(amount);
+        payable(owner).transfer(amount);
     }
 
     /// @notice Withdraws the entire balance of a specified ERC-20 token to the owner's address.
@@ -78,7 +79,7 @@ contract TenNineNine is ERC721A {
         IERC20 token = IERC20(tokenAddress);
         uint256 tokenBalance = token.balanceOf(address(this));
         require(tokenBalance > 0, "No token funds to withdraw");
-        token.transfer(owner(), tokenBalance);
+        token.transfer(owner, tokenBalance);
     }
 
     /// @notice Mints a specified quantity of tokens and allocates funds to the designer balance and game pot.
@@ -91,13 +92,13 @@ contract TenNineNine is ERC721A {
         uint256 currentSupply = totalSupply();
         for (uint16 i = 0; i < quantity; i++) {
             uint256 newTokenId = currentSupply + i;
-            uint8 teamIndex = uint8(newTokenId % teams.length); // Calculate the team index
-            uint8 team = teams[teamIndex]; // Get the team number
+            uint8 civilServantIndex = uint8(newTokenId % civilServants.length); // Calculate the team index
+            uint8 civilServant = civilServants[civilServantIndex]; // Get the team number
 
             _mint(msg.sender, newTokenId);
 
-            tokenCivilServants[newTokenId] = team; // Assign the team to the token
-            civilServantCounts[team]++; // Increment the team count
+            tokenToCivilServantMapping[newTokenId] = civilServant; // Assign the team to the token
+            civilServantCounts[civilServant]++; // Increment the team count
         }
     }
 
@@ -112,21 +113,21 @@ contract TenNineNine is ERC721A {
         for (uint256 i; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             if(!ownerOf(tokenId)) revert notOwner();
-            uint8 currentId = tokenCivilServants[tokenId];
+            uint8 currentId = tokenToCivilServantMapping[tokenId];
             if (currentId != newId){
                 newIncrement++; // Increment only if there was a change
-                    if (currentTeam == 0) {
+                    if (currentId == 0) {
                         genslerDecrement++;
-                    } else if (currentTeam == 1) {
+                    } else if (currentId == 1) {
                         yellenDecrement++;
-                    } else if (currentTeam == 2) {
+                    } else if (currentId == 2) {
                         werfelDecrement++;
                     }
 
-                    tokenCivilServants[tokenIds[i]] = newId; // Update team of the token
+                    tokenToCivilServantMapping[tokenIds[i]] = newId; // Update team of the token
             }
            
-            _bulkUpdatecivilServantCountsState(newTeam, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
+            _bulkUpdatecivilServantCountsState(newId, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
             _checkGameOver();
 
         }
@@ -142,7 +143,7 @@ contract TenNineNine is ERC721A {
         
 
         if (!lockURI) {
-            uint8 tokenCivilId = tokenCivilServants[tokenId];
+            uint8 tokenCivilId = tokenToCivilServantMapping[tokenId];
             if(tokenCivilId == 0){
                 return genslerURI;
             } else if(tokenCivilId == 1){

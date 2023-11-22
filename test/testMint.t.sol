@@ -7,7 +7,7 @@ contract testMint is Test{
     TenNineNine public tennn;
     function setUp() public {
         tennn = new TenNineNine();
-        counter.setNumber(0);
+
     }
 
     function testMintNone() public {
@@ -24,6 +24,10 @@ contract testMint is Test{
 
     function testMintMax() public {
         
+    }
+
+    function testFuzzMint() public{
+
     }
 
 }
