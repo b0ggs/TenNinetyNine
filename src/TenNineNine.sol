@@ -86,19 +86,20 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
     /// @notice Mints a specified quantity of tokens and allocates funds to the designer balance and game pot.
     /// @dev Requires the game to not have started and for there to be enough tokens left to mint.
     /// @param quantity The number of tokens to mint.
-    function mintToken(uint16 quantity) external payable {
+    function mintToken(uint256 quantity) external payable {
         require(totalSupply() + quantity <= MAX_TOKENS, "Mint exceeds max amount");
+        require(msg.value >= quantity * MINT_COST, "Not Enough ETH");
+
         uint256 currentSupply = totalSupply();
         for (uint16 i = 0; i < quantity; i++) {
             uint256 newTokenId = currentSupply + i;
             uint8 civilServantIndex = uint8(newTokenId % civilServants.length); // Calculate the team index
             uint8 civilServant = civilServants[civilServantIndex]; // Get the team number
 
-            _mint(msg.sender, newTokenId);
-
             tokenToCivilServantMapping[newTokenId] = civilServant; // Assign the team to the token
             civilServantCounts[civilServant]++; // Increment the team count
         }
+        _mint(msg.sender, quantity);
         refundIfOver(MINT_COST * quantity);
     }
 
@@ -116,11 +117,11 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
             uint8 currentId = tokenToCivilServantMapping[tokenId];
             if (currentId != newId){
                 newIncrement++; // Increment only if there was a change
-                    if (currentId == 0) {
+                    if (currentId == 1) {
                         genslerDecrement++;
-                    } else if (currentId == 1) {
-                        yellenDecrement++;
                     } else if (currentId == 2) {
+                        yellenDecrement++;
+                    } else if (currentId == 3) {
                         werfelDecrement++;
                     }
 
@@ -144,11 +145,11 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
 
         if (!lockURI) {
             uint8 tokenCivilId = tokenToCivilServantMapping[tokenId];
-            if(tokenCivilId == 0){
+            if(tokenCivilId == 1){
                 return genslerURI;
-            } else if(tokenCivilId == 1){
+            } else if(tokenCivilId == 2){
                 return yellenURI;
-            }else if(tokenCivilId == 2){
+            }else if(tokenCivilId == 3){
                 return werfelURI;
             } else{
                 revert nonExistentToken();
@@ -170,29 +171,29 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
     //INTERNAL FUNCTIONS
 
     function _bulkUpdatecivilServantCountsState(uint8 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werfelDecrement) internal {
-        if (newTeam == 0) {
-            civilServantCounts[0] += newIncrement;
-            civilServantCounts[1] -= yellenDecrement;
-            civilServantCounts[2] -= werfelDecrement;
-        } else if (newTeam == 1) {
+        if (newTeam == 1) {
             civilServantCounts[1] += newIncrement;
-            civilServantCounts[0] -= genslerDecrement;
-            civilServantCounts[2] -= werfelDecrement;
+            civilServantCounts[2] -= yellenDecrement;
+            civilServantCounts[3] -= werfelDecrement;
         } else if (newTeam == 2) {
             civilServantCounts[2] += newIncrement;
-            civilServantCounts[0] -= genslerDecrement;
-            civilServantCounts[1] -= yellenDecrement;
+            civilServantCounts[1] -= genslerDecrement;
+            civilServantCounts[3] -= werfelDecrement;
+        } else if (newTeam == 3) {
+            civilServantCounts[3] += newIncrement;
+            civilServantCounts[1] -= genslerDecrement;
+            civilServantCounts[2] -= yellenDecrement;
         }
     }
 
     function _checkGameOver() internal {
         uint256 winTokenAmount = WIN_TOKEN_AMOUNT;
         
-        if (civilServantCounts[0] >= winTokenAmount) {
+        if (civilServantCounts[1] >= winTokenAmount) {
             lockedURI = genslerURI;
-        } else if (civilServantCounts[1] >= winTokenAmount) {
-            lockedURI = yellenURI;
         } else if (civilServantCounts[2] >= winTokenAmount) {
+            lockedURI = yellenURI;
+        } else if (civilServantCounts[3] >= winTokenAmount) {
             lockedURI = werfelURI;
         }
 
