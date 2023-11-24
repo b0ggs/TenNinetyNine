@@ -89,6 +89,7 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
     function mintToken(uint256 quantity) external payable {
         require(totalSupply() + quantity <= MAX_TOKENS, "Mint exceeds max amount");
         require(msg.value >= quantity * MINT_COST, "Not Enough ETH");
+       // require(quantity > 0, "Zero Quantity");
 
         uint256 currentSupply = totalSupply();
         for (uint16 i = 0; i < quantity; i++) {

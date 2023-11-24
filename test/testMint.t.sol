@@ -15,7 +15,7 @@ contract testMint is Test{
 
     function testMintNone() public {
 
-        uint256 quantity = 1;
+        uint256 quantity = 0;
         uint256 mintCost = tennn.MINT_COST();
 
         vm.expectRevert("Zero Quantity");
@@ -30,33 +30,110 @@ contract testMint is Test{
 
         vm.prank(minter);
         tennn.mintToken{value: mintCost * quantity}(quantity);
-        assertEq(tennn.tokenToCivilServantMapping(0), returnServantId(0));
-        assertEq(tennn.tokenURI(0), "gensler");
-        assertEq(tennn.civilServantCounts(1),1);
-        assertEq(tennn.civilServantCounts(2),0);
-        assertEq(tennn.civilServantCounts(3),0);
+        
+        checkAsserts(0, quantity, quantity);
 
     }
 
     function testMintHundred() public {
+        uint256 quantity = 100;
+        uint256 mintCost = tennn.MINT_COST();
 
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * quantity}(quantity);
+        
+        checkAsserts(0, quantity, quantity);
     }
 
     function testMintMax() public {
+        uint256 quantity = 1099;
+        uint256 mintCost = tennn.MINT_COST();
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * quantity}(quantity);
+        
+        checkAsserts(0, quantity, quantity);
         
     }
 
-    function testMintTooLowValue() public{
+    function testMintTooManyNFTs() public {
+        uint256 quantity = 100;
+        uint256 mintCost = tennn.MINT_COST();
+        for (uint256 i = 0; i < 11; i++) {
+            if(i == 10){
+                vm.expectRevert("Mint exceeds max amount");
+                vm.prank(minter);
+                tennn.mintToken{value: mintCost * quantity}(quantity);
+            } else {
+                vm.prank(minter);
+                tennn.mintToken{value: mintCost * quantity}(quantity);
+                if (i ==0){
+                    checkAsserts(0, quantity, quantity);
+                } else{
+                    checkAsserts(i * quantity -1, quantity, (i+1) * quantity);
+                }
+            
+            }
+        }
 
+    }
+
+    function testMintTooLowValue() public{
+        uint256 quantity = 1;
+        uint256 mintCost = tennn.MINT_COST();
+
+        vm.expectRevert("Not Enough ETH");
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * quantity - 1}(quantity);
     }
 
     function testMintTooHighValue() public {
+        uint256 quantity = 10;
+        uint256 mintCost = tennn.MINT_COST();
+        uint256 initialBalance = minter.balance;
+        console.log("minter balance", initialBalance);
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * quantity + 1000}(quantity);
+
+        assertEq(minter.balance, initialBalance - (mintCost * quantity));
+    }
+
+
+    function testFuzzMintAmountandStart(uint256 x, uint256 y) public{
+        x = bound(x, 1, 1000);
+        y =bound(y, 1, 99);
+
+        uint256 mintCost = tennn.MINT_COST();
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * x}(x);
+        
+        checkAsserts(0, x, x);
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * y}(y);
+        
+        checkAsserts(x, y, x+y);
+
 
     }
 
-    function testFuzzMint() public{
+    function checkAsserts(uint256 startNumber, uint256 _quantity, uint256 totalMinted) public {
+        for (uint256 i = startNumber; i < startNumber + _quantity; i++) {
+            uint256 servantId = returnServantId(i);
+            string memory tokenURI = returnURI(servantId);
 
+            assertEq(tennn.tokenToCivilServantMapping(i), servantId);
+            assertEq(tennn.tokenURI(i), tokenURI);
+        }
+
+        (uint256 count1, uint256 count2, uint256 count3) = returnCounts(totalMinted);
+        assertEq(tennn.civilServantCounts(1), count1);
+        assertEq(tennn.civilServantCounts(2), count2);
+        assertEq(tennn.civilServantCounts(3), count3);
     }
+
 
     function returnServantId(uint256 _number) public pure returns (uint256) {
         return (_number % 3) + 1;
@@ -68,7 +145,7 @@ contract testMint is Test{
         } else if (servantId == 2) {
             return "yellen";
         } else if (servantId == 3) {
-            return "werler";
+            return "werfel";
         } else {
             return "invalid";
         }
