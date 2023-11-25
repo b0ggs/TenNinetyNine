@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {ERC721A} from "lib/ERC721A/contracts/ERC721A.sol";
 import {IERC20} from "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
@@ -14,7 +13,7 @@ import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 // Can we mint for OP?
 // can we add ways to withdraw other tokens?
 
-contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
+contract TenNineNine is ERC721A, Ownable{
 
     // Errors
     error notOwner();
@@ -23,7 +22,6 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
     error nonExistentToken();
     
     // Constants
-    uint256 public constant MINT_COST = 0.01 ether;
     uint16 public constant MAX_TOKENS = 1099; 
     uint16 public constant WIN_TOKEN_AMOUNT = 733; // two thirds
 
@@ -53,6 +51,8 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
 
 
     constructor(string memory name, string memory symbol)ERC721A(name, symbol)Ownable(msg.sender) {
+        _mint(msg.sender, MAX_TOKENS);
+        _setTeams(MAX_TOKENS);
     }
 
     receive() external payable {}
@@ -69,7 +69,7 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
     //     payable(owner).transfer(amount);
     // }
 
-    function withdrawBalance() external onlyOwner nonReentrant {
+    function withdrawBalance() external onlyOwner {
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "Transfer failed.");
     }
@@ -81,27 +81,6 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
         uint256 tokenBalance = token.balanceOf(address(this));
         require(tokenBalance > 0, "No token funds to withdraw");
         token.transfer(msg.sender, tokenBalance);
-    }
-
-    /// @notice Mints a specified quantity of tokens and allocates funds to the designer balance and game pot.
-    /// @dev Requires the game to not have started and for there to be enough tokens left to mint.
-    /// @param quantity The number of tokens to mint.
-    function mintToken(uint256 quantity) external payable {
-        require(totalSupply() + quantity <= MAX_TOKENS, "Mint exceeds max amount");
-        require(msg.value >= quantity * MINT_COST, "Not Enough ETH");
-       // require(quantity > 0, "Zero Quantity");
-
-        uint256 currentSupply = totalSupply();
-        for (uint16 i = 0; i < quantity; i++) {
-            uint256 newTokenId = currentSupply + i;
-            uint8 civilServantIndex = uint8(newTokenId % civilServants.length); // Calculate the team index
-            uint8 civilServant = civilServants[civilServantIndex]; // Get the team number
-
-            tokenToCivilServantMapping[newTokenId] = civilServant; // Assign the team to the token
-            civilServantCounts[civilServant]++; // Increment the team count
-        }
-        _mint(msg.sender, quantity);
-        refundIfOver(MINT_COST * quantity);
     }
 
     function changeTenNinetyNine(uint256[] calldata tokenIds, uint8 newId) external {
@@ -161,15 +140,20 @@ contract TenNineNine is ERC721A, Ownable, ReentrancyGuard {
         }
     }
 
-    //PRIVATE FUNCTIONS
-  function refundIfOver(uint256 price) private {
-    require(msg.value >= price, "Need to send more ETH.");
-    if (msg.value > price) {
-      payable(msg.sender).transfer(msg.value - price);
-    }
-  }
 
     //INTERNAL FUNCTIONS
+
+    function _setTeams(uint256 quantity) internal {
+ 
+        for (uint16 i = 0; i < quantity; i++) {
+            uint256 newTokenId =  i;
+            uint8 civilServantIndex = uint8(newTokenId % civilServants.length); // Calculate the team index
+            uint8 civilServant = civilServants[civilServantIndex]; // Get the team number
+
+            tokenToCivilServantMapping[newTokenId] = civilServant; // Assign the team to the token
+            civilServantCounts[civilServant]++; // Increment the team count
+        }
+    }
 
     function _bulkUpdatecivilServantCountsState(uint8 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werfelDecrement) internal {
         if (newTeam == 1) {
