@@ -70,7 +70,7 @@ contract testMint is Test{
                 if (i ==0){
                     checkAsserts(0, quantity, quantity);
                 } else{
-                    checkAsserts(i * quantity -1, quantity, (i+1) * quantity);
+                    checkAsserts(i * quantity, quantity, (i+1) * quantity);
                 }
             
             }
@@ -100,9 +100,9 @@ contract testMint is Test{
     }
 
 
-    function testFuzzMintAmountandStart(uint256 x, uint256 y) public{
+    function testFuzzMint1(uint256 x, uint256 y) public{
         x = bound(x, 1, 1000);
-        y =bound(y, 1, 99);
+        y = bound(y, 1, 99);
 
         uint256 mintCost = tennn.MINT_COST();
 
@@ -115,6 +115,32 @@ contract testMint is Test{
         tennn.mintToken{value: mintCost * y}(y);
         
         checkAsserts(x, y, x+y);
+
+
+    }
+
+        function testFuzzMint2(uint256 x, uint256 y, uint256 z, uint256 aa) public{
+        x = bound(x, 1, 300);
+        y = bound(y, 1, 300);
+        z = bound(z, 1, 300);
+        aa = bound(aa, 1, 299);
+
+        uint256 mintCost = tennn.MINT_COST();
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * x}(x);
+        
+        checkAsserts(0, x, x);
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * y}(y);
+        
+        checkAsserts(x, y, x+y);
+
+        vm.prank(minter);
+        tennn.mintToken{value: mintCost * y}(y);
+        
+        checkAsserts(x + y, z, x+y + z);
 
 
     }
