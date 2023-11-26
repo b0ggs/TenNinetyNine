@@ -32,7 +32,7 @@ contract TenNineNine is ERC721A, Ownable{
     string public yellenURI = "yellen";
     string public werfelURI = "werfel";
     string public lockedURI;
-    bool public lockURI = false;
+    bool public isURIlocked = false;
     
 
     // Data Structures
@@ -84,7 +84,8 @@ contract TenNineNine is ERC721A, Ownable{
     }
 
     function changeTenNinetyNine(uint256[] calldata tokenIds, uint8 newId) external {
-        if(newId != 0 && newId != 1 && newId != 2) revert notValidId();
+        if(newId != 1 && newId != 2 && newId != 3) revert notValidId();
+        require(!isURIlocked, "Game Over");
 
         uint256 newIncrement;
         uint256 genslerDecrement;
@@ -107,11 +108,10 @@ contract TenNineNine is ERC721A, Ownable{
 
                     tokenToCivilServantMapping[tokenIds[i]] = newId; // Update team of the token
             }
-           
-            _bulkUpdatecivilServantCountsState(newId, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
-            _checkGameOver();
 
         }
+        _bulkUpdatecivilServantCountsState(newId, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
+        _checkGameOver();
     }
 
     /// @notice Provides the metadata URI for a given token.
@@ -123,7 +123,7 @@ contract TenNineNine is ERC721A, Ownable{
         if(!_exists(tokenId)) revert nonExistentToken();
         
 
-        if (!lockURI) {
+        if (!isURIlocked) {
             uint8 tokenCivilId = tokenToCivilServantMapping[tokenId];
             if(tokenCivilId == 1){
                 return genslerURI;
@@ -183,7 +183,7 @@ contract TenNineNine is ERC721A, Ownable{
         }
 
         if (keccak256(abi.encodePacked(lockedURI)) != keccak256(abi.encodePacked(""))) { // If lockedURI has been set
-            lockURI = true;
+            isURIlocked = true;
           //  emit lockURI(lockedURI);
         }
     }
