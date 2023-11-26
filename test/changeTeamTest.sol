@@ -33,7 +33,7 @@ contract changeTeamTest is Test{
         tennn.changeTenNinetyNine(tokenArray, 1);
     }
 
-    function testGameOver() public {
+    function testGameOverGensler() public {
          uint256[] memory player1Ids = buildTokenIdArray(0, 366);
          uint256[] memory player2Ids = buildTokenIdArray(366, 732);
          uint256[] memory player3Ids = buildTokenIdArray(732, 800);
@@ -49,6 +49,42 @@ contract changeTeamTest is Test{
          vm.expectRevert("Game Over");
          vm.prank(player3);
          tennn.changeTenNinetyNine(player3Ids, 1);
+    }
+
+    function testGameOverYellen() public {
+         uint256[] memory player1Ids = buildTokenIdArray(0, 366);
+         uint256[] memory player2Ids = buildTokenIdArray(366, 732);
+         uint256[] memory player3Ids = buildTokenIdArray(732, 800);
+
+         vm.prank(player1);
+         tennn.changeTenNinetyNine(player1Ids, 2);
+
+         vm.prank(player2);
+         tennn.changeTenNinetyNine(player2Ids, 2);
+
+         assert(tennn.isURIlocked());
+
+         vm.expectRevert("Game Over");
+         vm.prank(player3);
+         tennn.changeTenNinetyNine(player3Ids, 2);
+    }
+
+    function testGameOverWerfel() public {
+         uint256[] memory player1Ids = buildTokenIdArray(0, 366);
+         uint256[] memory player2Ids = buildTokenIdArray(366, 732);
+         uint256[] memory player3Ids = buildTokenIdArray(732, 800);
+
+         vm.prank(player1);
+         tennn.changeTenNinetyNine(player1Ids, 3);
+
+         vm.prank(player2);
+         tennn.changeTenNinetyNine(player2Ids, 3);
+
+         assert(tennn.isURIlocked());
+
+         vm.expectRevert("Game Over");
+         vm.prank(player3);
+         tennn.changeTenNinetyNine(player3Ids, 3);
     }
 
     function testPlayer1ChangeFuzz(uint256 x) public {
@@ -262,7 +298,7 @@ contract changeTeamTest is Test{
         }
     }
 
-    //610??
+
     function testGameOverGenslerFuzz(uint256 x, uint256 y) public {
         x = bound(x, 366, 732);
         y = bound(y, 732, 1099);
@@ -311,6 +347,120 @@ contract changeTeamTest is Test{
                 console.log("gensler count 3", tennn.civilServantCounts(1));
 
                 if(611 + newGenslers + newGenslers2 >= tennn.WIN_TOKEN_AMOUNT()){
+                    console.log("assertion 2");
+                    assert(tennn.isURIlocked());
+                }
+        }
+
+    
+        
+    }
+
+  function testGameOverYellenFuzz(uint256 x, uint256 y) public {
+        x = bound(x, 366, 732);
+        y = bound(y, 732, 1099);
+
+        uint256[] memory player1Ids = buildTokenIdArray(0, 366);
+        uint256[] memory player2Ids = buildTokenIdArray(366, x);
+        uint256[] memory player3Ids = buildTokenIdArray(732, y);
+        
+
+        vm.prank(player1);
+        tennn.changeTenNinetyNine(player1Ids, 2);
+        console.log("yellen count 1", tennn.civilServantCounts(2));
+
+        uint256 newYellens;
+        if((x-366)% 3 > 0){
+            newYellens = ((x-366) / 3) * 2 + 1;
+        } else {
+            newYellens = ((x-366) / 3) * 2;
+        }
+
+        vm.prank(player2);
+        tennn.changeTenNinetyNine(player2Ids, 2);
+        console.log("yellen count 2", tennn.civilServantCounts(2));
+
+        uint256 newYellens2;
+        if((y-732) % 3 > 0){
+            newYellens2 = ((y-732) / 3) * 2 + 1;
+        } else {
+            newYellens2 = ((y-732) / 3) * 2;
+        }
+        console.log("newYellens", newYellens);
+        console.log("newYellens2", newYellens2);
+
+        if(610 + newYellens >= tennn.WIN_TOKEN_AMOUNT()){
+                console.log("assertion1");
+                assert(tennn.isURIlocked());
+
+                vm.expectRevert("Game Over");
+                vm.prank(player3);
+                tennn.changeTenNinetyNine(player3Ids, 2);
+                console.log("yellen count 3", tennn.civilServantCounts(2));
+        }else{
+            
+                vm.prank(player3);
+                tennn.changeTenNinetyNine(player3Ids, 2);
+                console.log("yellen count 3", tennn.civilServantCounts(2));
+
+                if(610 + newYellens + newYellens2 >= tennn.WIN_TOKEN_AMOUNT()){
+                    console.log("assertion 2");
+                    assert(tennn.isURIlocked());
+                }
+        }
+
+    
+        
+    }
+
+  function testGameOverWerfelFuzz(uint256 x, uint256 y) public {
+        x = bound(x, 366, 732);
+        y = bound(y, 732, 1099);
+
+        uint256[] memory player1Ids = buildTokenIdArray(0, 366);
+        uint256[] memory player2Ids = buildTokenIdArray(366, x);
+        uint256[] memory player3Ids = buildTokenIdArray(732, y);
+        
+
+        vm.prank(player1);
+        tennn.changeTenNinetyNine(player1Ids, 3);
+        console.log("werfel count 1", tennn.civilServantCounts(3));
+
+        uint256 newWerfels;
+        if((x-366)% 3 > 0){
+            newWerfels = ((x-366) / 3) * 2 + 1;
+        } else {
+            newWerfels = ((x-366) / 3) * 2;
+        }
+
+        vm.prank(player2);
+        tennn.changeTenNinetyNine(player2Ids, 3);
+        console.log("yellen count 2", tennn.civilServantCounts(3));
+
+        uint256 newWerfels2;
+        if((y-732) % 3 > 0){
+            newWerfels2 = ((y-732) / 3) * 2 + 1;
+        } else {
+            newWerfels2 = ((y-732) / 3) * 2;
+        }
+        console.log("newWerfels", newWerfels);
+        console.log("newWerfels2", newWerfels2);
+
+        if(610 + newWerfels >= tennn.WIN_TOKEN_AMOUNT()){
+                console.log("assertion1");
+                assert(tennn.isURIlocked());
+
+                vm.expectRevert("Game Over");
+                vm.prank(player3);
+                tennn.changeTenNinetyNine(player3Ids, 3);
+                console.log("werfel count 3", tennn.civilServantCounts(3));
+        }else{
+            
+                vm.prank(player3);
+                tennn.changeTenNinetyNine(player3Ids, 3);
+                console.log("werfel count 3", tennn.civilServantCounts(3));
+
+                if(610 + newWerfels + newWerfels2 >= tennn.WIN_TOKEN_AMOUNT()){
                     console.log("assertion 2");
                     assert(tennn.isURIlocked());
                 }
