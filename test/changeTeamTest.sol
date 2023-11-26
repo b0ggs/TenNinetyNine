@@ -13,9 +13,9 @@ contract changeTeamTest is Test{
         uint256 NFTbalance = tennn.balanceOf(address(this));
         assertEq(NFTbalance, 1099);
 
-        transferNFTs(player1, 366, 0);
-        transferNFTs(player2, 366, 366);
-        transferNFTs(player3, 367, 732);
+        transferNFTs(player1, 366, 0); // 0...365
+        transferNFTs(player2, 366, 366); // 366...732
+        transferNFTs(player3, 367, 732);// 
 
         uint256 p1Balance = tennn.balanceOf(address(player1));
         uint256 p2Balance = tennn.balanceOf(address(player2));
@@ -34,8 +34,8 @@ contract changeTeamTest is Test{
     }
 
     function testGameOver() public {
-         uint256[] memory player1Ids = buildTokenIdArray(0, 365);
-         uint256[] memory player2Ids = buildTokenIdArray(366, 731);
+         uint256[] memory player1Ids = buildTokenIdArray(0, 366);
+         uint256[] memory player2Ids = buildTokenIdArray(366, 732);
          uint256[] memory player3Ids = buildTokenIdArray(732, 800);
 
          vm.prank(player1);
@@ -56,7 +56,7 @@ contract changeTeamTest is Test{
         uint256 yellenStartCount = 366;
         uint256 werfelStartCount = 366;
 
-        x = bound(x,0, 365);
+        x = bound(x,0, 366);
 
         uint256[] memory player1Ids = buildTokenIdArray(0, x);
 
@@ -125,7 +125,7 @@ contract changeTeamTest is Test{
         uint256 yellenStartCount = 366;
         uint256 werfelStartCount = 366;
 
-        x = bound(x, 366, 731);
+        x = bound(x, 366, 732);
         uint256 y = x- 366;
 
         uint256[] memory player2Ids = buildTokenIdArray(366, x);
@@ -196,7 +196,7 @@ contract changeTeamTest is Test{
         uint256 yellenStartCount = 366;
         uint256 werfelStartCount = 366;
 
-        x = bound(x, 732, 1098);
+        x = bound(x, 732, 1099);
 
         uint256[] memory player3Ids = buildTokenIdArray(732, x);
 
@@ -262,41 +262,63 @@ contract changeTeamTest is Test{
         }
     }
 
-//611
- function testGameOverFuzz(uint256 x, uint256 y) public {
-    x = bound(x, 366, 731);
-    y = bound(y, 732, 1098);
+    //610??
+    function testGameOverGenslerFuzz(uint256 x, uint256 y) public {
+        x = bound(x, 366, 732);
+        y = bound(y, 732, 1099);
 
-    uint256[] memory player1Ids = buildTokenIdArray(0, 365);
-    uint256[] memory player2Ids = buildTokenIdArray(366, x);
-    uint256[] memory player3Ids = buildTokenIdArray(732, y);
-    
+        uint256[] memory player1Ids = buildTokenIdArray(0, 366);
+        uint256[] memory player2Ids = buildTokenIdArray(366, x);
+        uint256[] memory player3Ids = buildTokenIdArray(732, y);
+        
 
-    vm.prank(player1);
-    tennn.changeTenNinetyNine(player1Ids, 1);
+        vm.prank(player1);
+        tennn.changeTenNinetyNine(player1Ids, 1);
+        console.log("gensler count 1", tennn.civilServantCounts(1));
 
-    uint256 newGenslers = ((x-366) / 3) + ((x-366) % 3);
+        uint256 newGenslers;
+        if((x-366)% 3 == 2){
+            newGenslers = ((x-366) / 3) * 2 + 1;
+        } else {
+            newGenslers = ((x-366) / 3) * 2;
+        }
 
-    if(611 + newGenslers >= tennn.WIN_TOKEN_AMOUNT()){
-            console.log("assertion1");
-            assert(tennn.isURIlocked());
+        vm.prank(player2);
+        tennn.changeTenNinetyNine(player2Ids, 1);
+        console.log("gensler count 2", tennn.civilServantCounts(1));
 
-            vm.expectRevert("Game Over");
-            vm.prank(player3);
-            tennn.changeTenNinetyNine(player3Ids, 1);
-    }else{
-            vm.prank(player3);
-            tennn.changeTenNinetyNine(player3Ids, 1);
-            uint256 newGenslers2 = ((y-732) / 3) + ((y-732) % 3);
+        uint256 newGenslers2;
+        if((y-732) % 3 == 2){
+            newGenslers2 = ((y-732) / 3) * 2 + 1;
+        } else {
+            newGenslers2 = ((y-732) / 3) * 2;
+        }
+        console.log("newGenslers", newGenslers);
+        console.log("newGenslers2", newGenslers2);
+
+        if(611 + newGenslers >= tennn.WIN_TOKEN_AMOUNT()){
+                console.log("assertion1");
+                assert(tennn.isURIlocked());
+
+                vm.expectRevert("Game Over");
+                vm.prank(player3);
+                tennn.changeTenNinetyNine(player3Ids, 1);
+                console.log("gensler count 3", tennn.civilServantCounts(1));
+        }else{
+            
+                vm.prank(player3);
+                tennn.changeTenNinetyNine(player3Ids, 1);
+                console.log("gensler count 3", tennn.civilServantCounts(1));
+
                 if(611 + newGenslers + newGenslers2 >= tennn.WIN_TOKEN_AMOUNT()){
                     console.log("assertion 2");
                     assert(tennn.isURIlocked());
                 }
-    }
+        }
 
-   
     
- }
+        
+    }
 
 
     function transferNFTs(address recipient, uint256 quantity, uint256 startId) public {
@@ -316,7 +338,7 @@ contract changeTeamTest is Test{
     }
 
     function testFuzzOfAsserts(uint256 x) public {
-        x = bound(x,0,1098);
+        x = bound(x,0,1099);
         checkAsserts(x,0,1099);
     }
 

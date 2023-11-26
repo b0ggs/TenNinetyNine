@@ -176,16 +176,15 @@ contract TenNineNine is ERC721A, Ownable{
         
         if (civilServantCounts[1] >= winTokenAmount) {
             lockedURI = genslerURI;
+            isURIlocked = true;
         } else if (civilServantCounts[2] >= winTokenAmount) {
             lockedURI = yellenURI;
+            isURIlocked = true;
         } else if (civilServantCounts[3] >= winTokenAmount) {
             lockedURI = werfelURI;
+            isURIlocked = true;
         }
 
-        if (keccak256(abi.encodePacked(lockedURI)) != keccak256(abi.encodePacked(""))) { // If lockedURI has been set
-            isURIlocked = true;
-          //  emit lockURI(lockedURI);
-        }
     }
 
 
