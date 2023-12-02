@@ -1,13 +1,13 @@
-import "src/TenNineNine.sol";
+import "src/TenNinetyNineDA.sol";
 import "lib/forge-std/src/console.sol";
 import "lib/forge-std/src/Test.sol";
 
 contract deployTest is Test{
 
-    TenNineNine public tennn;
+    TenNinetyNineDA public tennn;
     address minter;
     function setUp() public {
-        tennn = new TenNineNine("test","TEST");
+        tennn = new TenNinetyNineDA("test","TEST");
 
     }
 

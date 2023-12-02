@@ -1,15 +1,15 @@
-import "src/TenNineNine.sol";
+import "src/TenNinetyNineDA.sol";
 import "lib/forge-std/src/console.sol";
 import "lib/forge-std/src/Test.sol";
 
 contract changeTeamTest is Test{
 
-    TenNineNine public tennn;
+    TenNinetyNineDA public tennn;
     address player1 = address(1);
     address player2 = address(2);
     address player3 = address(3);
     function setUp() public {
-        tennn = new TenNineNine("test","TEST");
+        tennn = new TenNinetyNineDA("test","TEST");
         uint256 NFTbalance = tennn.balanceOf(address(this));
         assertEq(NFTbalance, 1099);
 
@@ -28,7 +28,7 @@ contract changeTeamTest is Test{
     function testChangeButNotOwner() public {
         uint256[] memory tokenArray = buildTokenIdArray(900, 901);
 
-        vm.expectRevert(0x251c9d63);
+        vm.expectRevert(0x30cd7471);
         vm.prank(player1);
         tennn.changeTenNinetyNine(tokenArray, 1);
     }
@@ -46,7 +46,7 @@ contract changeTeamTest is Test{
 
          assert(tennn.isURIlocked());
 
-         vm.expectRevert("Game Over");
+         vm.expectRevert(0xdf469ccb);
          vm.prank(player3);
          tennn.changeTenNinetyNine(player3Ids, 1);
     }
@@ -64,7 +64,7 @@ contract changeTeamTest is Test{
 
          assert(tennn.isURIlocked());
 
-         vm.expectRevert("Game Over");
+         vm.expectRevert(0xdf469ccb);
          vm.prank(player3);
          tennn.changeTenNinetyNine(player3Ids, 2);
     }
@@ -82,7 +82,7 @@ contract changeTeamTest is Test{
 
          assert(tennn.isURIlocked());
 
-         vm.expectRevert("Game Over");
+         vm.expectRevert(0xdf469ccb);
          vm.prank(player3);
          tennn.changeTenNinetyNine(player3Ids, 3);
     }
@@ -336,7 +336,7 @@ contract changeTeamTest is Test{
                 console.log("assertion1");
                 assert(tennn.isURIlocked());
 
-                vm.expectRevert("Game Over");
+                vm.expectRevert(0xdf469ccb);
                 vm.prank(player3);
                 tennn.changeTenNinetyNine(player3Ids, 1);
                 console.log("gensler count 3", tennn.civilServantCounts(1));
@@ -393,7 +393,7 @@ contract changeTeamTest is Test{
                 console.log("assertion1");
                 assert(tennn.isURIlocked());
 
-                vm.expectRevert("Game Over");
+                vm.expectRevert(0xdf469ccb);
                 vm.prank(player3);
                 tennn.changeTenNinetyNine(player3Ids, 2);
                 console.log("yellen count 3", tennn.civilServantCounts(2));
@@ -450,7 +450,7 @@ contract changeTeamTest is Test{
                 console.log("assertion1");
                 assert(tennn.isURIlocked());
 
-                vm.expectRevert("Game Over");
+                vm.expectRevert(0xdf469ccb);
                 vm.prank(player3);
                 tennn.changeTenNinetyNine(player3Ids, 3);
                 console.log("werfel count 3", tennn.civilServantCounts(3));
