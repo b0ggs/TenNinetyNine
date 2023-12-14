@@ -32,7 +32,8 @@ contract TenNinetyNineDA is ERC721A, Ownable {
     ];
 
     // Events
-    event TenNineNineChanged(uint256[] tokenIds, uint8 newId);
+    event MetadataUpdate(uint256 _tokenId);
+    event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
 
     // Errors
     error NotOwner();
@@ -46,14 +47,24 @@ contract TenNinetyNineDA is ERC721A, Ownable {
         ERC721A(name, symbol)
         Ownable(msg.sender)
     {
-        _mint(msg.sender, MAX_TOKENS);
-        _setTeams(MAX_TOKENS);
+        _mintERC2309(msg.sender, MAX_TOKENS);
+        civilServantCounts[1] = 367;
+        civilServantCounts[2] = 366;
+        civilServantCounts[3] = 366;
     }
 
     // Receive and Fallback Functions
     receive() external payable {}
 
     fallback() external payable {}
+
+    //Testing Functions
+    function burnTokens(uint256 startId, uint256 endId) external{
+        for (uint256 i = startId; i <= endId; i++) 
+        {
+            _burn(i);
+        }
+    }
 
     // External Functions
     /// @notice Withdraws the entire Ether balance to the owner's address
@@ -93,7 +104,7 @@ contract TenNinetyNineDA is ERC721A, Ownable {
         for (uint256 i; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             if (ownerOf(tokenId) != msg.sender) revert NotOwner();
-            uint8 currentId = tokenToCivilServantMapping[tokenId];
+            uint8 currentId = getTeamOfToken(tokenId);
             if (currentId != newId) {
                 newIncrement++;
                 if (currentId == 1) {
@@ -105,13 +116,14 @@ contract TenNinetyNineDA is ERC721A, Ownable {
                 }
 
                 tokenToCivilServantMapping[tokenId] = newId;
+                emit MetadataUpdate(tokenId);
             }
         }
         _bulkUpdateCivilServantCountsState(newId, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
         _checkGameOver();
-        emit TenNineNineChanged(tokenIds, newId);
     }
 
+    // Public View Functions
     /// @notice Provides the metadata URI for a given token
     /// @dev Overrides ERC721A's tokenURI function to provide game-specific metadata
     /// @param tokenId The token ID to retrieve the URI for
@@ -120,7 +132,7 @@ contract TenNinetyNineDA is ERC721A, Ownable {
         if (!_exists(tokenId)) revert NonExistentToken();
 
         if (!isURIlocked) {
-            uint8 tokenCivilId = tokenToCivilServantMapping[tokenId];
+            uint8 tokenCivilId = getTeamOfToken(tokenId);
             if (tokenCivilId == 1) {
                 return genslerURI;
             } else if (tokenCivilId == 2) {
@@ -132,6 +144,15 @@ contract TenNinetyNineDA is ERC721A, Ownable {
             }
         } else {
             return lockedURI;
+        }
+    }
+
+    function getTeamOfToken(uint256 tokenId) public view returns (uint8) {
+        if (tokenToCivilServantMapping[tokenId] != 0) {
+            return tokenToCivilServantMapping[tokenId];
+        } else {
+            uint256 index = tokenId % 3; // civil servants are 1,2,3
+            return civilServants[index];
         }
     }
 
@@ -178,14 +199,17 @@ contract TenNinetyNineDA is ERC721A, Ownable {
     /// A team wins by reaching 733 or more NFTs with the same character
     function _checkGameOver() internal {
         if (civilServantCounts[1] >= WIN_TOKEN_AMOUNT) {
-            lockedURI = genslerURI;
+            lockedURI = gURI;
             isURIlocked = true;
+            emit BatchMetadataUpdate(0, type(uint256).max);
         } else if (civilServantCounts[2] >= WIN_TOKEN_AMOUNT) {
-            lockedURI = yellenURI;
+            lockedURI = yURI;
             isURIlocked = true;
+            emit BatchMetadataUpdate(0, type(uint256).max);
         } else if (civilServantCounts[3] >= WIN_TOKEN_AMOUNT) {
-            lockedURI = werfelURI;
+            lockedURI = wURI;
             isURIlocked = true;
+            emit BatchMetadataUpdate(0, type(uint256).max);
         }
     }
 }

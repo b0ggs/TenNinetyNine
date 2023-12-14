@@ -99,7 +99,7 @@ contract changeTeamTest is Test{
         vm.prank(player1);
         tennn.changeTenNinetyNine(player1Ids, 1);
         for (uint256 i = 0; i < player1Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player1Ids[i]), 1);
+            assertEq(tennn.getTeamOfToken(player1Ids[i]), 1);
             assertEq(tennn.tokenURI(player1Ids[i]), "gensler");
         }
 
@@ -118,7 +118,7 @@ contract changeTeamTest is Test{
         vm.prank(player1);
         tennn.changeTenNinetyNine(player1Ids, 2);
         for (uint256 i = 0; i < player1Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player1Ids[i]), 2);
+            assertEq(tennn.getTeamOfToken(player1Ids[i]), 2);
             assertEq(tennn.tokenURI(player1Ids[i]), "yellen");
         }
 
@@ -136,7 +136,7 @@ contract changeTeamTest is Test{
         vm.prank(player1);
         tennn.changeTenNinetyNine(player1Ids, 3);
         for (uint256 i = 0; i < player1Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player1Ids[i]), 3);
+            assertEq(tennn.getTeamOfToken(player1Ids[i]), 3);
             assertEq(tennn.tokenURI(player1Ids[i]), "werfel");
         }
 
@@ -170,7 +170,7 @@ contract changeTeamTest is Test{
         vm.prank(player2);
         tennn.changeTenNinetyNine(player2Ids, 1);
         for (uint256 i = 0; i < player2Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player2Ids[i]), 1);
+            assertEq(tennn.getTeamOfToken(player2Ids[i]), 1);
             assertEq(tennn.tokenURI(player2Ids[i]), "gensler");
         }
 
@@ -189,7 +189,7 @@ contract changeTeamTest is Test{
         vm.prank(player2);
         tennn.changeTenNinetyNine(player2Ids, 2);
         for (uint256 i = 0; i < player2Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player2Ids[i]), 2);
+            assertEq(tennn.getTeamOfToken(player2Ids[i]), 2);
             assertEq(tennn.tokenURI(player2Ids[i]), "yellen");
         }
 
@@ -207,7 +207,7 @@ contract changeTeamTest is Test{
         vm.prank(player2);
         tennn.changeTenNinetyNine(player2Ids, 3);
         for (uint256 i = 0; i < player2Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player2Ids[i]), 3);
+            assertEq(tennn.getTeamOfToken(player2Ids[i]), 3);
             assertEq(tennn.tokenURI(player2Ids[i]), "werfel");
         }
 
@@ -241,7 +241,7 @@ contract changeTeamTest is Test{
         vm.prank(player3);
         tennn.changeTenNinetyNine(player3Ids, 1);
         for (uint256 i = 0; i < player3Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player3Ids[i]), 1);
+            assertEq(tennn.getTeamOfToken(player3Ids[i]), 1);
             assertEq(tennn.tokenURI(player3Ids[i]), "gensler");
         }
 
@@ -260,7 +260,7 @@ contract changeTeamTest is Test{
         vm.prank(player3);
         tennn.changeTenNinetyNine(player3Ids, 2);
         for (uint256 i = 0; i < player3Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player3Ids[i]), 2);
+            assertEq(tennn.getTeamOfToken(player3Ids[i]), 2);
             assertEq(tennn.tokenURI(player3Ids[i]), "yellen");
         }
 
@@ -278,7 +278,7 @@ contract changeTeamTest is Test{
         vm.prank(player3);
         tennn.changeTenNinetyNine(player3Ids, 3);
         for (uint256 i = 0; i < player3Ids.length; i++) {
-            assertEq(tennn.tokenToCivilServantMapping(player3Ids[i]), 3);
+            assertEq(tennn.getTeamOfToken(player3Ids[i]), 3);
             assertEq(tennn.tokenURI(player3Ids[i]), "werfel");
         }
 
@@ -497,7 +497,7 @@ contract changeTeamTest is Test{
             uint256 servantId = returnServantId(i);
             string memory tokenURI = returnURI(servantId);
 
-            assertEq(tennn.tokenToCivilServantMapping(i), servantId);
+            assertEq(tennn.getTeamOfToken(i), servantId);
             assertEq(tennn.tokenURI(i), tokenURI);
         }
 

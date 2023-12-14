@@ -29,7 +29,7 @@ contract deployTest is Test{
             uint256 servantId = returnServantId(i);
             string memory tokenURI = returnURI(servantId);
 
-            assertEq(tennn.tokenToCivilServantMapping(i), servantId);
+            assertEq(tennn.getTeamOfToken(i), servantId);
             assertEq(tennn.tokenURI(i), tokenURI);
         }
 
