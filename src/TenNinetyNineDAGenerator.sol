@@ -2,18 +2,17 @@
 pragma solidity ^0.8.4;
 
 import { ERC721A } from "lib/ERC721A/contracts/ERC721A.sol";
-import { IERC20 } from "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import { Ownable } from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-/// @title TenNineNineDA
+/// @title TenNineNineDAGenerator
 /// @notice An NFT game... add description
 /// @dev Inherits ERC721A and Ownable for NFT and ownership functionalities
-contract TenNinetyNineDA is ERC721A, Ownable {
+contract TenNinetyNineDAGenerator is ERC721A, Ownable {
     // Constants
     uint16 public constant MAX_TOKENS = 1099; 
     uint16 public constant WIN_TOKEN_AMOUNT = 733; // Two thirds
 
     // State Variables
+    uint256 formId;
     string public genslerURI = "gensler";
     string public yellenURI = "yellen";
     string public werfelURI = "werfel";
@@ -23,6 +22,7 @@ contract TenNinetyNineDA is ERC721A, Ownable {
     // Mappings
     mapping(uint256 => uint8) public tokenToCivilServantMapping;
     mapping(uint8 => uint256) public civilServantCounts;
+    mapping(uint256 => address) public formIdOwner;
 
     // Array of civil servants
     uint8[3] public civilServants = [
@@ -53,37 +53,6 @@ contract TenNinetyNineDA is ERC721A, Ownable {
         civilServantCounts[3] = 366;
     }
 
-    // Receive and Fallback Functions
-    receive() external payable {}
-
-    fallback() external payable {}
-
-    //Testing Functions
-    function burnTokens(uint256 startId, uint256 endId) external{
-        for (uint256 i = startId; i <= endId; i++) 
-        {
-            _burn(i);
-        }
-    }
-
-    // External Functions
-    /// @notice Withdraws the entire Ether balance to the owner's address
-    /// @dev Only accessible by the owner
-    function withdrawBalance() external onlyOwner {
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "Transfer failed.");
-    }
-
-    /// @notice Withdraws the entire balance of a specified ERC-20 token to the owner's address
-    /// @dev Only accessible by the owner
-    /// @param tokenAddress The address of the ERC-20 token contract
-    function withdrawToken(address tokenAddress) external onlyOwner {
-        IERC20 token = IERC20(tokenAddress);
-        uint256 tokenBalance = token.balanceOf(address(this));
-        require(tokenBalance > 0, "No token funds to withdraw");
-        token.transfer(msg.sender, tokenBalance);
-    }
-
     /// @notice Changes the Civil Servant for specified token/s
     /// @dev Can only be called by the token owner
     /// @param tokenIds Array of token IDs to change
@@ -92,7 +61,7 @@ contract TenNinetyNineDA is ERC721A, Ownable {
     /// 1 = Gensler
     /// 2 = Yellen
     /// 3 = Werfer
-    function changeTenNinetyNine(uint256[] calldata tokenIds, uint8 newId) external {
+    function exchangeCurrency(uint256[] calldata tokenIds, uint8 newId) external {
         if (newId != 1 && newId != 2 && newId != 3) revert NotValidId();
         if(isURIlocked) revert GameOver();
 
@@ -120,6 +89,8 @@ contract TenNinetyNineDA is ERC721A, Ownable {
             }
         }
         _bulkUpdateCivilServantCountsState(newId, newIncrement, genslerDecrement, yellenDecrement, werfelDecrement);
+        formIdOwner[formId] = msg.sender;
+        formId++;
         _checkGameOver();
     }
 
@@ -157,22 +128,6 @@ contract TenNinetyNineDA is ERC721A, Ownable {
     }
 
     // Internal Functions
-    /// @dev Sets the initial team distribution for the tokens
-    /// Gensler = 367
-    /// Yellen = 366
-    /// Werfel = 366
-    /// @param quantity The total number of tokens to assign teams to
-    function _setTeams(uint256 quantity) internal {
-        for (uint16 i; i < quantity; i++) {
-            uint256 newTokenId = i;
-            uint8 civilServantIndex = uint8(newTokenId % civilServants.length);
-            uint8 civilServant = civilServants[civilServantIndex];
-
-            tokenToCivilServantMapping[newTokenId] = civilServant;
-            civilServantCounts[civilServant]++;
-        }
-    }
-
     /// @dev Updates the counts of each civil servant team in bulk
     /// @param newTeam The team that is being changed to
     /// @param newIncrement The increment count for the new team
