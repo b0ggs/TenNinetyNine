@@ -6,13 +6,13 @@ import { ERC721A } from "lib/ERC721A/contracts/ERC721A.sol";
 /// @title TenNineNineDAGenerator
 /// @notice An NFT game... add description
 /// @dev Inherits ERC721A and Ownable for NFT and ownership functionalities
-contract TenNinetyNineDAGenerator is ERC721A, Ownable {
+contract TenNinetyNineDAGenerator is ERC721A {
     // Constants
     uint16 public constant MAX_TOKENS = 1099; 
     uint16 public constant WIN_TOKEN_AMOUNT = 733; // Two thirds
 
     // State Variables
-    uint256 formId;
+    uint256 public formId;
     string public genslerURI = "gensler";
     string public yellenURI = "yellen";
     string public werfelURI = "werfel";
@@ -45,7 +45,6 @@ contract TenNinetyNineDAGenerator is ERC721A, Ownable {
     // Constructor
     constructor(string memory name, string memory symbol)
         ERC721A(name, symbol)
-        Ownable(msg.sender)
     {
         _mintERC2309(msg.sender, MAX_TOKENS);
         civilServantCounts[1] = 367;
@@ -154,15 +153,15 @@ contract TenNinetyNineDAGenerator is ERC721A, Ownable {
     /// A team wins by reaching 733 or more NFTs with the same character
     function _checkGameOver() internal {
         if (civilServantCounts[1] >= WIN_TOKEN_AMOUNT) {
-            lockedURI = gURI;
+            lockedURI = genslerURI;
             isURIlocked = true;
             emit BatchMetadataUpdate(0, type(uint256).max);
         } else if (civilServantCounts[2] >= WIN_TOKEN_AMOUNT) {
-            lockedURI = yURI;
+            lockedURI = yellenURI;
             isURIlocked = true;
             emit BatchMetadataUpdate(0, type(uint256).max);
         } else if (civilServantCounts[3] >= WIN_TOKEN_AMOUNT) {
-            lockedURI = wURI;
+            lockedURI = werfelURI;
             isURIlocked = true;
             emit BatchMetadataUpdate(0, type(uint256).max);
         }

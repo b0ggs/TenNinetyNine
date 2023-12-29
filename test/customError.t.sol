@@ -12,7 +12,8 @@ contract ErrorHashMatcher is Test {
     "IncorrectPayment()",
     "NotValidId()",
     "GameOver()",
-    "NonExistentToken()"
+    "NonExistentToken()",
+    "OwnableUnauthorizedAccount()"
   ];
 
   function testWriteErrors() external {
