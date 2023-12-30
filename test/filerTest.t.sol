@@ -6,15 +6,15 @@ import "src/TenNinetyNineDAFiler.sol";
 import "lib/forge-std/src/console.sol";
 import "lib/forge-std/src/Test.sol";
 
-contract filerTest is Test{
-
+contract filerTest is Test {
     TenNinetyNineDAGenerator public tenG;
     TenNinetyNineDAFiler public tenF;
     address player1 = address(1);
     address player2 = address(2);
     address player3 = address(3);
-    address[3] public players =[player1, player2, player3];
+    address[3] public players = [player1, player2, player3];
     mapping(uint256 => address) public formIdOwnerTest;
+
     function setUp() public {
         tenG = new TenNinetyNineDAGenerator("test","TEST");
         tenF = new TenNinetyNineDAFiler("test", "TEST", address(tenG));
@@ -23,14 +23,12 @@ contract filerTest is Test{
 
         transferNFTs(player1, 366, 0); // 0...365
         transferNFTs(player2, 366, 366); // 366...732
-        transferNFTs(player3, 367, 732);// 
-
+        transferNFTs(player3, 367, 732); //
         uint256 p1Balance = tenG.balanceOf(address(player1));
         uint256 p2Balance = tenG.balanceOf(address(player2));
         uint256 p3Balance = tenG.balanceOf(address(player3));
-        assertEq(p1Balance + p2Balance + p3Balance , 1099);
+        assertEq(p1Balance + p2Balance + p3Balance, 1099);
         assertEq(tenG.formId(), 0);
-
     }
 
     function testChangeButNotOwner() public {
@@ -40,7 +38,6 @@ contract filerTest is Test{
         vm.prank(player1);
         tenG.exchangeCurrency(tokenArray, 1);
     }
-
 
     function testFormIdsFuzz(uint256 x, uint256 y, uint256 z, uint256 r) public {
         x = bound(x, 0, 200); // Bound the number of exchanges
@@ -67,101 +64,96 @@ contract filerTest is Test{
         checkWellsNotice(x);
         checkAuditNotificationNotOwner(x);
         checkWellsNoticeNotOwner(x);
-
     }
 
-    function checkWellsNoticeNotOwner(uint256 x) public{
-         address player;
-         for (uint256 i; i < x; i++) {
+    function checkWellsNoticeNotOwner(uint256 x) public {
+        address player;
+        for (uint256 i; i < x; i++) {
             player = formIdOwnerTest[i];
             vm.prank(player);
             // Not sure how to create the data for this: error OwnableUnauthorizedAccount(address account);
             vm.expectRevert();
             tenF.wellsNotice(i, "Owner Changed Wells");
-
-         }
+        }
     }
-    function checkAuditNotificationNotOwner(uint256 x) public{
-         address player;
-         for (uint256 i; i < x; i++) {
+
+    function checkAuditNotificationNotOwner(uint256 x) public {
+        address player;
+        for (uint256 i; i < x; i++) {
             player = formIdOwnerTest[i];
             vm.prank(player);
             // Not sure how to create the data for this: error OwnableUnauthorizedAccount(address account);
             vm.expectRevert();
             tenF.auditNotification(i, "Owner Changed Audit");
-
-         }
+        }
     }
-    function checkWellsNotice(uint256 x) public{
-         address player;
-         for (uint256 i; i < x; i++) {
+
+    function checkWellsNotice(uint256 x) public {
+        address player;
+        for (uint256 i; i < x; i++) {
             player = formIdOwnerTest[i];
             tenF.wellsNotice(i, "Owner Changed Wells");
             assertEq(tenF.tokenURI(tenF.formIds(i)), "Owner Changed Wells");
             assertEq(tenF.ownerOf(tenF.formIds(i)), player);
             assertTrue(tenF.isMinted(i));
-         }
+        }
     }
-    function checkAuditNotification(uint256 x) public{
-         address player;
-         for (uint256 i; i < x; i++) {
+
+    function checkAuditNotification(uint256 x) public {
+        address player;
+        for (uint256 i; i < x; i++) {
             player = formIdOwnerTest[i];
             tenF.auditNotification(i, "Owner Changed Audit");
             assertEq(tenF.tokenURI(tenF.formIds(i)), "Owner Changed Audit");
             assertEq(tenF.ownerOf(tenF.formIds(i)), player);
             assertTrue(tenF.isMinted(i));
-         }
+        }
     }
-    function checkFilingsNotOwner(uint256 x) public{
+
+    function checkFilingsNotOwner(uint256 x) public {
         address player;
         address notPlayer;
         // Note that this may be more robust of we can start at a random number and iterate around.
         // I tried implementing this with b but failed.
         for (uint256 i; i < x; i++) {
-
             player = formIdOwnerTest[i];
 
-            if(player == player1){
+            if (player == player1) {
                 notPlayer = player2;
-            }else if(player == player2){
+            } else if (player == player2) {
                 notPlayer = player3;
-            }else{
+            } else {
                 notPlayer = player1;
             }
 
             vm.prank(notPlayer);
             vm.expectRevert(0x30cd7471);
-            tenF.fileForm1099DA(i,"google.com");
-
+            tenF.fileForm1099DA(i, "google.com");
         }
-
     }
-    
 
-    function checkFilings(uint256 x) public{
+    function checkFilings(uint256 x) public {
         address player;
         // Note that this may be more robust of we can start at a random number and iterate around.
         // I tried implementing this with b but failed.
         for (uint256 i; i < x; i++) {
-
             player = formIdOwnerTest[i];
 
             vm.prank(player);
-            tenF.fileForm1099DA(i,"google.com");
+            tenF.fileForm1099DA(i, "google.com");
             assertEq(tenF.tokenURI(tenF.formIds(i)), "google.com");
             assertEq(tenF.ownerOf(tenF.formIds(i)), player);
             assertTrue(tenF.isMinted(i));
         }
-
     }
 
     // Helper function to get a random token ID owned by a player
     function randomTokenIdForPlayer(address player, uint256 z) internal view returns (uint256) {
-        if (player == player1){
+        if (player == player1) {
             z = bound(z, 0, 365);
-        }else if(player == player2){
+        } else if (player == player2) {
             z = bound(z, 366, 731);
-        }else{
+        } else {
             z = bound(z, 732, 1098);
         }
         return z;
@@ -179,7 +171,6 @@ contract filerTest is Test{
     }
 
     function transferNFTs(address recipient, uint256 quantity, uint256 startId) public {
-
         for (uint256 i = startId; i < startId + quantity; i++) {
             // Assuming token IDs are sequential starting from 1
             uint256 tokenId = i;
@@ -191,7 +182,6 @@ contract filerTest is Test{
 
     function testDeploy() public {
         checkAsserts(0, 1099, 1099);
-        
     }
 
     function checkAsserts(uint256 startNumber, uint256 _quantity, uint256 totalMinted) public {
@@ -208,7 +198,6 @@ contract filerTest is Test{
         assertEq(tenG.civilServantCounts(2), count2);
         assertEq(tenG.civilServantCounts(3), count3);
     }
-
 
     function returnServantId(uint256 _number) public pure returns (uint256) {
         return (_number % 3) + 1;
@@ -237,16 +226,12 @@ contract filerTest is Test{
         return (count1, count2, count3);
     }
 
-    function buildTokenIdArray(uint256 startId, uint256 endId) public pure returns(uint256[] memory) {
-        uint256 range = endId - startId;  // Adjust range to include endId
+    function buildTokenIdArray(uint256 startId, uint256 endId) public pure returns (uint256[] memory) {
+        uint256 range = endId - startId; // Adjust range to include endId
         uint256[] memory buildTokenIds = new uint256[](range);
         for (uint16 i = 0; i < range; i++) {
             buildTokenIds[i] = startId + i;
         }
         return buildTokenIds;
     }
-
 }
-
-
-

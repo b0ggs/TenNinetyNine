@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { ERC721A } from "lib/ERC721A/contracts/ERC721A.sol";
+import {ERC721A} from "lib/ERC721A/contracts/ERC721A.sol";
 
 /// @title TenNineNineDAGenerator
-/// @notice An NFT game... add description
-/// @dev Inherits ERC721A and Ownable for NFT and ownership functionalities
+/// @notice "1099-DA" is an AI-generated art project using NFTs to
+///         comment on blockchain regulations.
+/// @dev Inherits ERC721A for batch minting and NFT management.
+///      Implements game mechanics for dynamic metadata alteration based
+///      on user interactions. Tracks distribution of appointees across NFTs.
+///      Uses internal functions for updating civil servant counts and
+///      checking game-ending conditions. Includes metadata URI setting
+///      and locking functionality.
 contract TenNinetyNineDAGenerator is ERC721A {
     // Constants
-    uint16 public constant MAX_TOKENS = 1099; 
+    uint16 public constant MAX_TOKENS = 1099;
     uint16 public constant WIN_TOKEN_AMOUNT = 733; // Two thirds
 
     // State Variables
@@ -28,7 +34,7 @@ contract TenNinetyNineDAGenerator is ERC721A {
     uint8[3] public civilServants = [
         1, // Gensler
         2, // Yellen
-        3  // Werfel
+        3 // Werfel
     ];
 
     // Events
@@ -43,26 +49,41 @@ contract TenNinetyNineDAGenerator is ERC721A {
     error NonExistentToken();
 
     // Constructor
-    constructor(string memory name, string memory symbol)
-        ERC721A(name, symbol)
-    {
+
+    /// @notice Creates a new TenNinetyNineDAGenerator contract.
+    /// @param name The name of the NFT collection.
+    /// @param symbol The symbol of the NFT collection.
+    /// @dev Initializes the contract by minting the maximum number of tokens to the contract deployer and
+    ///      setting the initial distribution of civil servant counts. The `civilServantCounts` are distributed
+    ///      across different IDs representing various civil servants, essential for the game's mechanics.
+    constructor(string memory name, string memory symbol) ERC721A(name, symbol) {
         _mintERC2309(msg.sender, MAX_TOKENS);
-        civilServantCounts[1] = 367;
-        civilServantCounts[2] = 366;
-        civilServantCounts[3] = 366;
+        civilServantCounts[1] = 367; // Initial count for civil servant 1
+        civilServantCounts[2] = 366; // Initial count for civil servant 2
+        civilServantCounts[3] = 366; // Initial count for civil servant 3
+    }
+
+    /// @notice Deletes a batch of tokens from `i` to `x`
+    /// @dev NOTE This function should be removed before deploying the contract
+    /// @param i The starting index of tokens to delete
+    /// @param x The ending index of tokens to delete
+    function deleteBatch(uint16 i, uint16 x) public {
+        for (i; i < x; i++) {
+            _burn(i);
+        }
     }
 
     /// @notice Changes the Civil Servant for specified token/s
     /// @dev Can only be called by the token owner
     /// @param tokenIds Array of token IDs to change
-    /// @param newId The new ID to be assigned 
+    /// @param newId The new ID to be assigned
     /// Character Ids:
     /// 1 = Gensler
     /// 2 = Yellen
     /// 3 = Werfer
     function exchangeCurrency(uint256[] calldata tokenIds, uint8 newId) external {
         if (newId != 1 && newId != 2 && newId != 3) revert NotValidId();
-        if(isURIlocked) revert GameOver();
+        if (isURIlocked) revert GameOver();
 
         uint256 newIncrement;
         uint256 genslerDecrement;
@@ -117,6 +138,9 @@ contract TenNinetyNineDAGenerator is ERC721A {
         }
     }
 
+    /// @notice Retrieves the team ID of a specific token
+    /// @param tokenId The ID of the token to query
+    /// @return The team ID associated with the given token
     function getTeamOfToken(uint256 tokenId) public view returns (uint8) {
         if (tokenToCivilServantMapping[tokenId] != 0) {
             return tokenToCivilServantMapping[tokenId];
@@ -126,14 +150,19 @@ contract TenNinetyNineDAGenerator is ERC721A {
         }
     }
 
-    // Internal Functions
-    /// @dev Updates the counts of each civil servant team in bulk
-    /// @param newTeam The team that is being changed to
-    /// @param newIncrement The increment count for the new team
-    /// @param genslerDecrement The decrement count for the Gensler team
-    /// @param yellenDecrement The decrement count for the Yellen team
-    /// @param werfelDecrement The decrement count for the Werfel team
-    function _bulkUpdateCivilServantCountsState(uint8 newTeam, uint256 newIncrement, uint256 genslerDecrement, uint256 yellenDecrement, uint256 werfelDecrement) internal {
+    /// @dev Updates the counts of civil servants based on the latest changes
+    /// @param newTeam The team that tokens are changing to
+    /// @param newIncrement The number of tokens added to the new team
+    /// @param genslerDecrement The number of tokens to decrement from the Gensler team
+    /// @param yellenDecrement The number of tokens to decrement from the Yellen team
+    /// @param werfelDecrement The number of tokens to decrement from the Werfel team
+    function _bulkUpdateCivilServantCountsState(
+        uint8 newTeam,
+        uint256 newIncrement,
+        uint256 genslerDecrement,
+        uint256 yellenDecrement,
+        uint256 werfelDecrement
+    ) internal {
         if (newTeam == 1) {
             civilServantCounts[1] += newIncrement;
             civilServantCounts[2] -= yellenDecrement;
@@ -149,8 +178,9 @@ contract TenNinetyNineDAGenerator is ERC721A {
         }
     }
 
-    /// @dev Checks if any team has won and locks the URI if the game is over
-    /// A team wins by reaching 733 or more NFTs with the same character
+    /// @dev Checks if the game conditions have been met and locks the URI if so
+    /// A team wins and ends the game by accumulating at least `WIN_TOKEN_AMOUNT` tokens
+
     function _checkGameOver() internal {
         if (civilServantCounts[1] >= WIN_TOKEN_AMOUNT) {
             lockedURI = genslerURI;

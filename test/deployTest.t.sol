@@ -2,13 +2,12 @@ import "src/TenNinetyNineDAGenerator.sol";
 import "lib/forge-std/src/console.sol";
 import "lib/forge-std/src/Test.sol";
 
-contract deployTest is Test{
-
+contract deployTest is Test {
     TenNinetyNineDAGenerator public tennn;
     address minter;
+
     function setUp() public {
         tennn = new TenNinetyNineDAGenerator("test","TEST");
-
     }
 
     function testDeploy() public {
@@ -16,12 +15,11 @@ contract deployTest is Test{
         assertEq(NFTbalance, 1099);
 
         checkAsserts(0, 1099, 1099);
-        
     }
 
     function testFuzzOfAsserts(uint256 x) public {
-        x = bound(x,0,1098);
-        checkAsserts(x,0,1099);
+        x = bound(x, 0, 1098);
+        checkAsserts(x, 0, 1099);
     }
 
     function checkAsserts(uint256 startNumber, uint256 _quantity, uint256 totalMinted) public {
@@ -38,7 +36,6 @@ contract deployTest is Test{
         assertEq(tennn.civilServantCounts(2), count2);
         assertEq(tennn.civilServantCounts(3), count3);
     }
-
 
     function returnServantId(uint256 _number) public pure returns (uint256) {
         return (_number % 3) + 1;
@@ -66,5 +63,4 @@ contract deployTest is Test{
 
         return (count1, count2, count3);
     }
-
 }

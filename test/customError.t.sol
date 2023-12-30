@@ -6,39 +6,38 @@ import "lib/forge-std/src/console.sol";
 
 //FOUNDRY_PROFILE=lite forge test --match-path test/CustomErrors/ErrorHashMatcher.t.sol -vv
 contract ErrorHashMatcher is Test {
-  // List the custom errors
-  string[] public errors = [
-    "NotOwner()",
-    "IncorrectPayment()",
-    "NotValidId()",
-    "GameOver()",
-    "NonExistentToken()",
-    "OwnableUnauthorizedAccount()"
-  ];
+    // List the custom errors
+    string[] public errors = [
+        "NotOwner()",
+        "IncorrectPayment()",
+        "NotValidId()",
+        "GameOver()",
+        "NonExistentToken()",
+        "OwnableUnauthorizedAccount()"
+    ];
 
-  function testWriteErrors() external {
-    string memory outputFile = "test/ErrorHashes.csv"; // Specify the path
-    // Write the header to the CSV
-    vm.writeFile(outputFile, "Error Signature,Hash\n");
+    function testWriteErrors() external {
+        string memory outputFile = "test/ErrorHashes.csv"; // Specify the path
+        // Write the header to the CSV
+        vm.writeFile(outputFile, "Error Signature,Hash\n");
 
-    for (uint256 i = 0; i < errors.length; i++) {
-      bytes4 hash = bytes4(keccak256(abi.encodePacked(errors[i])));
-      // Create the CSV line
-      string memory line =
-        string(abi.encodePacked("\"", errors[i], "\",\"", toHexString(hash), "\"\n"));
-      // Append the line to the file
-      vm.writeLine(outputFile, line);
+        for (uint256 i = 0; i < errors.length; i++) {
+            bytes4 hash = bytes4(keccak256(abi.encodePacked(errors[i])));
+            // Create the CSV line
+            string memory line = string(abi.encodePacked("\"", errors[i], "\",\"", toHexString(hash), "\"\n"));
+            // Append the line to the file
+            vm.writeLine(outputFile, line);
+        }
     }
-  }
 
-  // Helper function to convert bytes4 to a hex string
-  function toHexString(bytes4 data) internal pure returns (string memory) {
-    bytes memory alphabet = "0123456789abcdef";
-    bytes memory str = new bytes(8);
-    for (uint256 i = 0; i < 4; i++) {
-      str[i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
-      str[1 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
+    // Helper function to convert bytes4 to a hex string
+    function toHexString(bytes4 data) internal pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(8);
+        for (uint256 i = 0; i < 4; i++) {
+            str[i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
+            str[1 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
     }
-    return string(str);
-  }
 }

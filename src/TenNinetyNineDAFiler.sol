@@ -2,18 +2,15 @@
 pragma solidity ^0.8.4;
 
 import {TenNinetyNineDAGenerator} from "./TenNinetyNineDAGenerator.sol";
-import { ERC721A } from "lib/ERC721A/contracts/ERC721A.sol";
-import { Ownable } from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-
+import {ERC721A} from "lib/ERC721A/contracts/ERC721A.sol";
+import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract TenNinetyNineDAFiler is ERC721A, Ownable {
-
     // ========================
     // ==== State Variables ===
     // ========================
 
     TenNinetyNineDAGenerator public tenNineNine;
-
 
     mapping(uint256 => string) public uris;
     mapping(uint256 => bool) public isMinted;
@@ -27,7 +24,6 @@ contract TenNinetyNineDAFiler is ERC721A, Ownable {
     error NotOwner();
     error AlreadyExists();
     error NonExistentToken();
-
 
     constructor(string memory name, string memory symbol, address _generator)
         ERC721A(name, symbol)
@@ -59,7 +55,6 @@ contract TenNinetyNineDAFiler is ERC721A, Ownable {
         emit MetadataUpdate(tokenId);
     }
 
-
     /// @notice Provides the metadata URI for a given token
     /// @dev Overrides ERC721A's tokenURI function to provide game-specific metadata
     /// @param tokenId The token ID to retrieve the URI for
@@ -72,9 +67,9 @@ contract TenNinetyNineDAFiler is ERC721A, Ownable {
     /// @notice Sets the URI for a given token ID.
     /// @param tokenId The ID of the token.
     /// @param _newURI The URI to set for the token.
+
     function _setTokenUri(uint256 tokenId, string memory _newURI) internal {
         if (bytes(uris[tokenId]).length != 0) revert UriAlreadySet();
         uris[tokenId] = _newURI;
     }
-
 }
