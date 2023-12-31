@@ -17,7 +17,7 @@ import { Ownable } from "lib/openzeppelin-contracts/contracts/access/Ownable.sol
 contract TenNinetyNineDAFiler is ERC721A, Ownable {
 
     // State Variables
-    TenNinetyNineDAGenerator public tenNineNine;
+    TenNinetyNineDAGenerator public immutable tenNineNine;
 
     // Mappings
     mapping(uint256 => string) public uris;
@@ -46,6 +46,9 @@ contract TenNinetyNineDAFiler is ERC721A, Ownable {
         _mint(msg.sender, 3);
     }
 
+    function getNextTokenId() public view returns (uint256){
+        return _nextTokenId();
+    }
     // External Functions
 
     /// @notice Mints a new 1099-DA form NFT with a unique URI.

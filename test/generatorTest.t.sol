@@ -24,7 +24,10 @@ contract generatorTest is Test {
         uint256 p2Balance = tennn.balanceOf(address(player2));
         uint256 p3Balance = tennn.balanceOf(address(player3));
         assertEq(p1Balance + p2Balance + p3Balance, 1099);
-        assertEq(tennn.formId(), 0);
+        assertEq(p1Balance, 366);
+        assertEq(p2Balance, 366);
+        assertEq(p3Balance, 367);
+        assertEq(tennn.formId(), 3);
     }
 
     function testChangeButNotOwner() public {
@@ -43,21 +46,21 @@ contract generatorTest is Test {
         vm.prank(player1);
         vm.expectEmit(true, false, false, false);
         tennn.exchangeCurrency(player1Ids, 1);
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         vm.prank(player2);
         vm.expectEmit(true, true, false, false);
         tennn.exchangeCurrency(player2Ids, 1);
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         assert(tennn.isURIlocked());
 
         vm.expectRevert(0xdf469ccb);
         vm.prank(player3);
         tennn.exchangeCurrency(player3Ids, 1);
-        assertEq(tennn.formId(), 2);
+        assertEq(tennn.formId(), 5);
     }
 
     function testGameOverYellen() public {
@@ -68,21 +71,21 @@ contract generatorTest is Test {
         vm.prank(player1);
         vm.expectEmit(true, false, false, false);
         tennn.exchangeCurrency(player1Ids, 2);
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         vm.prank(player2);
         vm.expectEmit(true, true, false, false);
         tennn.exchangeCurrency(player2Ids, 2);
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         assert(tennn.isURIlocked());
 
         vm.expectRevert(0xdf469ccb);
         vm.prank(player3);
         tennn.exchangeCurrency(player3Ids, 2);
-        assertEq(tennn.formId(), 2);
+        assertEq(tennn.formId(), 5);
     }
 
     function testGameOverWerfel() public {
@@ -93,21 +96,21 @@ contract generatorTest is Test {
         vm.prank(player1);
         vm.expectEmit(true, false, false, false);
         tennn.exchangeCurrency(player1Ids, 3);
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         vm.prank(player2);
         vm.expectEmit(true, true, false, false);
         tennn.exchangeCurrency(player2Ids, 3);
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         assert(tennn.isURIlocked());
 
         vm.expectRevert(0xdf469ccb);
         vm.prank(player3);
         tennn.exchangeCurrency(player3Ids, 3);
-        assertEq(tennn.formId(), 2);
+        assertEq(tennn.formId(), 5);
     }
 
     function testPlayer1ChangeFuzz(uint256 x) public {
@@ -125,8 +128,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player1Ids[i]), 1);
             assertEq(tennn.tokenURI(player1Ids[i]), "gensler");
         }
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         uint256 addedIds = (x / 3 * 2);
         console.log("gensler");
@@ -146,8 +149,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player1Ids[i]), 2);
             assertEq(tennn.tokenURI(player1Ids[i]), "yellen");
         }
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player1);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player1);
 
         console.log("yellen");
         if (x % 3 > 0) {
@@ -166,8 +169,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player1Ids[i]), 3);
             assertEq(tennn.tokenURI(player1Ids[i]), "werfel");
         }
-        assertEq(tennn.formId(), 3);
-        assertEq(tennn.formIdOwner(2), player1);
+        assertEq(tennn.formId(), 6);
+        assertEq(tennn.formIdOwner(5), player1);
 
         console.log("werfel");
         if (x % 3 == 2) {
@@ -201,8 +204,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player2Ids[i]), 1);
             assertEq(tennn.tokenURI(player2Ids[i]), "gensler");
         }
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player2);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player2);
 
         uint256 addedIds = (y / 3 * 2);
         console.log("gensler");
@@ -222,8 +225,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player2Ids[i]), 2);
             assertEq(tennn.tokenURI(player2Ids[i]), "yellen");
         }
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         console.log("yellen");
         if (y % 3 > 0) {
@@ -242,8 +245,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player2Ids[i]), 3);
             assertEq(tennn.tokenURI(player2Ids[i]), "werfel");
         }
-        assertEq(tennn.formId(), 3);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 6);
+        assertEq(tennn.formIdOwner(5), player2);
 
         console.log("werfel");
         if (y % 3 == 2) {
@@ -278,8 +281,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player3Ids[i]), 1);
             assertEq(tennn.tokenURI(player3Ids[i]), "gensler");
         }
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player3);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player3);
 
         uint256 addedIds = (y / 3 * 2);
         console.log("gensler");
@@ -299,8 +302,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player3Ids[i]), 2);
             assertEq(tennn.tokenURI(player3Ids[i]), "yellen");
         }
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player3);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player3);
 
         console.log("yellen");
         if (y % 3 > 0) {
@@ -319,8 +322,8 @@ contract generatorTest is Test {
             assertEq(tennn.getTeamOfToken(player3Ids[i]), 3);
             assertEq(tennn.tokenURI(player3Ids[i]), "werfel");
         }
-        assertEq(tennn.formId(), 3);
-        assertEq(tennn.formIdOwner(2), player3);
+        assertEq(tennn.formId(), 6);
+        assertEq(tennn.formIdOwner(5), player3);
 
         console.log("werfel");
         if (y % 3 == 2) {
@@ -350,8 +353,8 @@ contract generatorTest is Test {
         vm.expectEmit(true, false, false, false);
         tennn.exchangeCurrency(player1Ids, 1);
         console.log("gensler count 1", tennn.civilServantCounts(1));
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         uint256 newGenslers;
         if ((x - 366) % 3 == 2) {
@@ -363,8 +366,8 @@ contract generatorTest is Test {
         vm.prank(player2);
         tennn.exchangeCurrency(player2Ids, 1);
         console.log("gensler count 2", tennn.civilServantCounts(1));
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         uint256 newGenslers2;
         if ((y - 732) % 3 == 2) {
@@ -392,8 +395,8 @@ contract generatorTest is Test {
                 console.log("assertion 2");
                 assert(tennn.isURIlocked());
             }
-            assertEq(tennn.formId(), 3);
-            assertEq(tennn.formIdOwner(2), player3);
+            assertEq(tennn.formId(), 6);
+            assertEq(tennn.formIdOwner(5), player3);
         }
     }
 
@@ -408,8 +411,8 @@ contract generatorTest is Test {
         vm.prank(player1);
         tennn.exchangeCurrency(player1Ids, 2);
         console.log("yellen count 1", tennn.civilServantCounts(2));
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         uint256 newYellens;
         if ((x - 366) % 3 > 0) {
@@ -421,8 +424,8 @@ contract generatorTest is Test {
         vm.prank(player2);
         tennn.exchangeCurrency(player2Ids, 2);
         console.log("yellen count 2", tennn.civilServantCounts(2));
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         uint256 newYellens2;
         if ((y - 732) % 3 > 0) {
@@ -451,8 +454,8 @@ contract generatorTest is Test {
                 assert(tennn.isURIlocked());
             }
 
-            assertEq(tennn.formId(), 3);
-            assertEq(tennn.formIdOwner(2), player3);
+            assertEq(tennn.formId(), 6);
+            assertEq(tennn.formIdOwner(5), player3);
         }
     }
 
@@ -467,8 +470,8 @@ contract generatorTest is Test {
         vm.prank(player1);
         tennn.exchangeCurrency(player1Ids, 3);
         console.log("werfel count 1", tennn.civilServantCounts(3));
-        assertEq(tennn.formId(), 1);
-        assertEq(tennn.formIdOwner(0), player1);
+        assertEq(tennn.formId(), 4);
+        assertEq(tennn.formIdOwner(3), player1);
 
         uint256 newWerfels;
         if ((x - 366) % 3 > 0) {
@@ -480,8 +483,8 @@ contract generatorTest is Test {
         vm.prank(player2);
         tennn.exchangeCurrency(player2Ids, 3);
         console.log("yellen count 2", tennn.civilServantCounts(3));
-        assertEq(tennn.formId(), 2);
-        assertEq(tennn.formIdOwner(1), player2);
+        assertEq(tennn.formId(), 5);
+        assertEq(tennn.formIdOwner(4), player2);
 
         uint256 newWerfels2;
         if ((y - 732) % 3 > 0) {
@@ -509,15 +512,15 @@ contract generatorTest is Test {
                 console.log("assertion 2");
                 assert(tennn.isURIlocked());
             }
-            assertEq(tennn.formId(), 3);
-            assertEq(tennn.formIdOwner(2), player3);
+            assertEq(tennn.formId(), 6);
+            assertEq(tennn.formIdOwner(5), player3);
         }
     }
 
     function testFormIdsFuzz(uint256 x, uint256 y, uint256 z, uint256 r) public {
-        x = bound(x, 0, 200); // Bound the number of exchanges
+        x = bound(x, 3, 200); // Bound the number of exchanges
 
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             // Randomize player selection and token ID
             uint8 playerIndex = randomPlayer(y);
             address player = players[playerIndex];

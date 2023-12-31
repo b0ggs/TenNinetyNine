@@ -16,12 +16,12 @@ contract TenNinetyNineDAGenerator is ERC721A {
     // Constants
     uint16 public constant MAX_TOKENS = 1099;
     uint16 public constant WIN_TOKEN_AMOUNT = 733; // Two thirds
+    string public constant genslerURI = "gensler";
+    string public constant yellenURI = "yellen";
+    string public constant werfelURI = "werfel";
 
     // State Variables
-    uint256 public formId;
-    string public genslerURI = "gensler";
-    string public yellenURI = "yellen";
-    string public werfelURI = "werfel";
+    uint256 public formId = 3;
     string public lockedURI;
     bool public isURIlocked = false;
 

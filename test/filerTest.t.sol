@@ -28,7 +28,13 @@ contract filerTest is Test {
         uint256 p2Balance = tenG.balanceOf(address(player2));
         uint256 p3Balance = tenG.balanceOf(address(player3));
         assertEq(p1Balance + p2Balance + p3Balance, 1099);
-        assertEq(tenG.formId(), 0);
+        assertEq(p1Balance, 366);
+        assertEq(p2Balance, 366);
+        assertEq(p3Balance, 367);
+        assertEq(tenG.formId(), 3);
+        uint256 firstTokenID = tenF.getNextTokenId();
+        console.log("Token ID");
+        console.log(firstTokenID);
     }
 
     function testChangeButNotOwner() public {
@@ -40,9 +46,9 @@ contract filerTest is Test {
     }
 
     function testFormIdsFuzz(uint256 x, uint256 y, uint256 z, uint256 r) public {
-        x = bound(x, 0, 200); // Bound the number of exchanges
+        x = bound(x, 3, 200); // Bound the number of exchanges
 
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3 ; i <= x; i++) {
             // Randomize player selection and token ID
             uint8 playerIndex = randomPlayer(y);
             address player = players[playerIndex];
@@ -57,6 +63,7 @@ contract filerTest is Test {
             assertEq(tenG.formId(), i + 1, "Form ID should increment correctly");
             assertEq(tenG.formIdOwner(i), player, "Form owner should match the exchanging player");
             formIdOwnerTest[i] = player;
+
         }
         checkFilingsNotOwner(x);
         checkFilings(x);
@@ -64,11 +71,12 @@ contract filerTest is Test {
         checkWellsNotice(x);
         checkAuditNotificationNotOwner(x);
         checkWellsNoticeNotOwner(x);
+
     }
 
     function checkWellsNoticeNotOwner(uint256 x) public {
         address player;
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             player = formIdOwnerTest[i];
             vm.prank(player);
             // Not sure how to create the data for this: error OwnableUnauthorizedAccount(address account);
@@ -79,7 +87,7 @@ contract filerTest is Test {
 
     function checkAuditNotificationNotOwner(uint256 x) public {
         address player;
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             player = formIdOwnerTest[i];
             vm.prank(player);
             // Not sure how to create the data for this: error OwnableUnauthorizedAccount(address account);
@@ -90,7 +98,7 @@ contract filerTest is Test {
 
     function checkWellsNotice(uint256 x) public {
         address player;
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             player = formIdOwnerTest[i];
             tenF.wellsNotice(i, "Owner Changed Wells");
             assertEq(tenF.tokenURI(tenF.formIds(i)), "Owner Changed Wells");
@@ -101,7 +109,7 @@ contract filerTest is Test {
 
     function checkAuditNotification(uint256 x) public {
         address player;
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             player = formIdOwnerTest[i];
             tenF.auditNotification(i, "Owner Changed Audit");
             assertEq(tenF.tokenURI(tenF.formIds(i)), "Owner Changed Audit");
@@ -115,7 +123,7 @@ contract filerTest is Test {
         address notPlayer;
         // Note that this may be more robust of we can start at a random number and iterate around.
         // I tried implementing this with b but failed.
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             player = formIdOwnerTest[i];
 
             if (player == player1) {
@@ -136,7 +144,7 @@ contract filerTest is Test {
         address player;
         // Note that this may be more robust of we can start at a random number and iterate around.
         // I tried implementing this with b but failed.
-        for (uint256 i; i < x; i++) {
+        for (uint256 i = 3; i <= x; i++) {
             player = formIdOwnerTest[i];
 
             vm.prank(player);
